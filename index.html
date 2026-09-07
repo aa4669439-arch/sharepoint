@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>SharePoint 知識管理建置｜課程報名查詢</title>
+<style>
+  :root{
+    --navy:#17324d;
+    --blue:#2e7d9f;
+    --blue2:#5aa7bd;
+    --teal:#5aaea3;
+    --sky:#eaf5f8;
+    --paper:#fbfcfd;
+    --line:#dce8ec;
+    --text:#25313c;
+    --muted:#6f7b85;
+    --white:#ffffff;
+    --green:#2d8a68;
+    --amber:#a9701f;
+    --shadow:0 16px 40px rgba(30,67,86,.10);
+    --radius:24px;
+  }
+
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;
+    font-family:"Microsoft JhengHei","Noto Sans TC",system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    color:var(--text);
+    background:
+      radial-gradient(circle at 12% 8%, rgba(90,167,189,.10), transparent 28%),
+      radial-gradient(circle at 92% 18%, rgba(90,174,163,.09), transparent 26%),
+      #f7fafb;
+  }
+
+  .page{max-width:1180px;margin:auto;padding:28px 24px 52px}
+
+  .topbar{
+    display:flex;align-items:center;justify-content:space-between;
+    gap:16px;margin-bottom:22px
+  }
+
+  .brand{
+    display:flex;align-items:center;gap:12px;
+    color:var(--navy);font-weight:800;letter-spacing:.5px
+  }
+  .brand-mark{
+    width:38px;height:38px;border-radius:12px;
+    display:grid;place-items:center;color:#fff;font-weight:900;
+    background:linear-gradient(135deg,var(--blue),var(--teal));
+    box-shadow:0 8px 18px rgba(46,125,159,.18)
+  }
+
+  .pill{
+    padding:9px 14px;border-radius:999px;background:#eef7f7;color:#287d72;
+    font-size:13px;font-weight:700;border:1px solid #d5ece8
+  }
+
+  .hero{
+    position:relative;overflow:hidden;
+    background:rgba(255,255,255,.92);
+    border:1px solid #e4edf0;border-radius:30px;
+    padding:46px 48px 38px;box-shadow:var(--shadow)
+  }
+
+  .hero:before,.hero:after{
+    content:"";position:absolute;border-radius:999px;filter:blur(.2px);pointer-events:none
+  }
+  .hero:before{
+    width:280px;height:280px;right:-100px;top:-120px;
+    background:linear-gradient(135deg,rgba(90,167,189,.18),rgba(90,174,163,.10))
+  }
+  .hero:after{
+    width:180px;height:180px;left:-80px;bottom:-105px;
+    background:rgba(46,125,159,.07)
+  }
+
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:8px;
+    color:var(--blue);font-size:14px;font-weight:800;letter-spacing:1.4px
+  }
+  .eyebrow:before{content:"";width:26px;height:3px;border-radius:5px;background:var(--blue)}
+
+  h1{
+    margin:12px 0 12px;color:#15293b;
+    font-size:clamp(34px,5vw,56px);line-height:1.13;letter-spacing:-1.5px
+  }
+  .accent-line{
+    width:230px;max-width:60%;height:4px;border-radius:99px;
+    background:linear-gradient(90deg,var(--blue),#3ba9c8);margin:10px 0 18px
+  }
+  .hero p{margin:0;max-width:820px;font-size:18px;line-height:1.85;color:#4f5e68}
+
+  .hero-stats{
+    margin-top:30px;display:grid;grid-template-columns:repeat(3,1fr);gap:14px;
+    max-width:760px
+  }
+  .stat{
+    background:#f7fbfc;border:1px solid #e0edf0;border-radius:18px;padding:17px 18px
+  }
+  .stat b{display:block;color:var(--navy);font-size:21px;margin-bottom:4px}
+  .stat span{font-size:13px;color:var(--muted)}
+
+  .section{margin-top:28px}
+  .section-title{
+    display:flex;align-items:end;justify-content:space-between;gap:18px;margin:0 2px 14px
+  }
+  .section-title h2{margin:0;color:var(--navy);font-size:24px}
+  .section-title p{margin:0;color:var(--muted);font-size:14px}
+
+  .course-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+  .course-card{
+    background:#fff;border:1px solid #e3ecef;border-radius:24px;
+    padding:24px;box-shadow:0 10px 28px rgba(26,63,79,.07);
+    position:relative;overflow:hidden
+  }
+  .course-card:after{
+    content:"";position:absolute;right:-24px;top:-32px;width:115px;height:115px;border-radius:50%;
+    background:rgba(90,167,189,.08)
+  }
+  .date-row{display:flex;align-items:center;gap:16px;position:relative;z-index:1}
+  .date-badge{
+    min-width:82px;height:82px;border-radius:20px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    background:linear-gradient(145deg,#e9f5f8,#f8fcfd);
+    border:1px solid #d8ebef;color:var(--blue)
+  }
+  .date-badge strong{font-size:28px;line-height:1}
+  .date-badge span{font-size:13px;margin-top:6px;font-weight:700}
+  .course-card h3{margin:0 0 7px;font-size:21px;color:#1c3548}
+  .course-card .time{font-size:17px;font-weight:800;color:var(--blue)}
+  .meta{display:flex;gap:9px;flex-wrap:wrap;margin-top:20px}
+  .chip{
+    font-size:13px;padding:8px 11px;border-radius:10px;background:#f5f8f9;
+    border:1px solid #e2eaed;color:#52616b
+  }
+  .chip.good{background:#edf8f4;color:var(--green);border-color:#d4ebe2}
+
+  .grid-msg{
+    grid-column:1 / -1;background:#fff;border:1px solid #e3ecef;border-radius:24px;
+    padding:26px;color:var(--muted);font-size:15px;line-height:1.7
+  }
+  .grid-msg.err{border-color:#e8d5b8;background:#fdf8f0;color:#7d5a22}
+  .grid-msg b{display:block;color:#3b4a55;margin-bottom:6px;font-size:16px}
+  .grid-msg.err b{color:var(--amber)}
+
+  .search-wrap{
+    margin-top:30px;background:linear-gradient(145deg,#183650,#23526e);
+    border-radius:28px;padding:30px;box-shadow:0 16px 40px rgba(23,50,77,.16);
+    color:#fff
+  }
+  .search-wrap h2{margin:0;font-size:26px}
+  .search-wrap p{margin:8px 0 20px;color:#dbe7ed;font-size:14px}
+  .search-row{display:flex;gap:12px}
+  .search-input{
+    flex:1;border:0;outline:none;border-radius:16px;padding:16px 18px;font-size:16px;
+    background:#fff;color:#20323f;box-shadow:inset 0 0 0 1px rgba(0,0,0,.04)
+  }
+  .search-input:focus{box-shadow:inset 0 0 0 2px #73c9c1}
+  .search-btn{
+    border:0;border-radius:16px;padding:0 24px;font-weight:800;font-size:15px;
+    background:linear-gradient(135deg,#73c9c1,#62b7cf);color:#123040;cursor:pointer;
+    min-height:54px;transition:.2s ease
+  }
+  .search-btn:hover:not(:disabled){transform:translateY(-1px);filter:brightness(1.03)}
+  .search-btn:disabled{opacity:.5;cursor:not-allowed}
+  .search-btn:focus-visible,.search-input:focus-visible{outline:3px solid #a7e5dd;outline-offset:2px}
+
+  .result{margin-top:18px}
+  .result-card{
+    background:#fff;color:var(--text);border-radius:20px;padding:20px;
+    display:grid;grid-template-columns:1.1fr .9fr;gap:18px;align-items:center
+  }
+  .result-card + .result-card{margin-top:10px}
+  .result-name{font-size:22px;font-weight:900;color:#183650}
+  .result-sub{margin-top:5px;color:#6e7a84;font-size:14px}
+  .result-class{
+    background:#eff8fa;border:1px solid #d9ecef;border-radius:16px;padding:14px 16px
+  }
+  .result-class b{display:block;color:#1d6e89;font-size:18px;margin-bottom:4px}
+  .empty{
+    background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);
+    padding:15px 16px;border-radius:16px;color:#ecf5f8;line-height:1.7
+  }
+
+  .updated{
+    margin-top:14px;font-size:13px;color:#b9cbd6
+  }
+
+  .info-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:18px;margin-top:28px}
+  .panel{
+    background:#fff;border:1px solid #e3ecef;border-radius:24px;padding:24px;
+    box-shadow:0 10px 28px rgba(26,63,79,.06)
+  }
+  .panel h3{margin:0 0 16px;color:var(--navy);font-size:20px}
+  .notice{
+    display:grid;grid-template-columns:36px 1fr;gap:12px;align-items:start;
+    padding:14px 0;border-top:1px solid #edf2f4
+  }
+  .notice:first-of-type{border-top:0;padding-top:0}
+  .num{
+    width:30px;height:30px;border-radius:10px;display:grid;place-items:center;
+    background:#edf6f8;color:var(--blue);font-weight:900;font-size:13px
+  }
+  .notice b{display:block;color:#263d4d;margin-bottom:4px}
+  .notice span{font-size:14px;color:#6c7881;line-height:1.6}
+
+  .admin-box{background:#f8fbfc;border:1px dashed #bfd5dc;border-radius:18px;padding:16px}
+  .admin-box code{display:block;margin-top:8px;font-size:12px;white-space:pre-wrap;color:#47606e}
+  .small{font-size:13px;color:#71808a;line-height:1.7}
+  footer{text-align:center;color:#8a969d;font-size:12px;margin-top:26px}
+
+  @media(prefers-reduced-motion:reduce){
+    *{transition:none !important}
+    html{scroll-behavior:auto}
+  }
+
+  @media(max-width:800px){
+    .page{padding:18px 14px 36px}
+    .hero{padding:34px 24px 28px}
+    .hero-stats{grid-template-columns:1fr}
+    .course-grid,.info-grid{grid-template-columns:1fr}
+    .search-row{flex-direction:column}
+    .search-btn{padding:15px 20px}
+    .result-card{grid-template-columns:1fr}
+    .topbar{align-items:flex-start}
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-mark">KM</div>
+      <div>知識管理課程平台</div>
+    </div>
+    <div class="pill">課程報名資訊</div>
+  </div>
+
+  <section class="hero">
+    <div class="eyebrow">SHAREPOINT KNOWLEDGE MANAGEMENT</div>
+    <h1>SharePoint 知識管理建置<br>試作教學課程報名查詢</h1>
+    <div class="accent-line"></div>
+    <p>輔導特定單位建立 SharePoint 應用能力，記錄各單位的職責分配，作為知識管理平台落地實施的基礎。</p>
+
+    <div class="hero-stats">
+      <div class="stat"><b id="statSessions">－</b><span>可依報名日期參與課程</span></div>
+      <div class="stat"><b id="statTime">－</b><span>全天實作與教學</span></div>
+      <div class="stat"><b>即時查詢</b><span>輸入姓名或工號即可確認</span></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-title">
+      <h2>課程場次</h2>
+      <p>請依報名結果於指定日期準時參與</p>
+    </div>
+
+    <div class="course-grid" id="courseGrid">
+      <div class="grid-msg">正在載入課程場次…</div>
+    </div>
+  </section>
+
+  <section class="search-wrap" id="query">
+    <h2>查詢我的上課時間</h2>
+    <p>請輸入「姓名」或「工號」。系統會顯示您目前登錄的課程日期與時間。</p>
+    <div class="search-row">
+      <input id="keyword" class="search-input" placeholder="例如：王小明 / A12345" autocomplete="off" disabled />
+      <button id="searchBtn" class="search-btn" disabled>查詢報名結果</button>
+    </div>
+    <div class="result" id="result"></div>
+    <div class="updated" id="updated"></div>
+  </section>
+
+  <section class="info-grid">
+    <div class="panel">
+      <h3>報名資訊</h3>
+      <div class="notice">
+        <div class="num">01</div>
+        <div><b>課程時間</b><span>兩梯次皆為 08:00–17:00，請依查詢結果參與指定場次。</span></div>
+      </div>
+      <div class="notice">
+        <div class="num">02</div>
+        <div><b>查詢方式</b><span>以姓名或工號查詢即可。若查無資料，請洽課程承辦人確認名單。</span></div>
+      </div>
+      <div class="notice">
+        <div class="num">03</div>
+        <div><b>課程提醒</b><span>建議攜帶院內可使用之電腦設備，並預先確認 SharePoint 存取權限。</span></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>名單資料設定</h3>
+      <div class="admin-box">
+        <div class="small">名單已經改成外掛檔案。這個頁面每次打開，都會去讀同一個資料夾裡的 <b>roster.json</b>。要換名單，只要更新那個檔案，不用再動 HTML。</div>
+        <code>{
+  "updatedAt": "2026-09-07 10:00",
+  "sessions": [ { "date":"2026-09-21", "name":"第一梯次", ... } ],
+  "people":   [ { "name":"王小明", "id":"A12345", ... } ]
+}</code>
+      </div>
+      <p class="small" style="margin:14px 2px 0">
+        之後會由 Apps Script 自動產生並更新 roster.json，你就不必手動上傳。
+      </p>
+    </div>
+  </section>
+
+  <footer>SharePoint 知識管理建置｜課程報名查詢頁</footer>
+</div>
+
+<script>
+  /* ===================================================================
+     設定區：整份檔案你唯一可能需要改的地方
+     roster.json 跟 index.html 放在同一個資料夾，所以這樣寫就好。
+     =================================================================== */
+  const ROSTER_URL = "roster.json";
+
+  /* ===================================================================
+     以下不用改
+     =================================================================== */
+
+  const MONTHS = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
+
+  let DATA = { updatedAt:"", sessions:[], people:[] };
+  let sessionMap = {};
+
+  function escapeHtml(text){
+    return String(text ?? "")
+      .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;").replaceAll("'","&#039;");
+  }
+
+  // 把 "2026-09-21" 拆成 { day:"21", mon:"SEP", label:"2026 / 09 / 21" }
+  function parseDate(iso){
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso || "").trim());
+    if(!m) return { day:"–", mon:"", label:String(iso || "") };
+    return {
+      day: m[3],
+      mon: MONTHS[parseInt(m[2],10) - 1] || "",
+      label: `${m[1]} / ${m[2]} / ${m[3]}`
+    };
+  }
+
+  function renderSessions(){
+    const grid = document.getElementById("courseGrid");
+
+    if(!DATA.sessions.length){
+      grid.innerHTML = `<div class="grid-msg"><b>目前沒有課程場次</b>名單檔案裡還沒有填入場次資料。</div>`;
+      return;
+    }
+
+    grid.innerHTML = DATA.sessions.map(s => {
+      const d = parseDate(s.date);
+      const count = DATA.people.filter(p => p.date === s.date).length;
+      return `
+        <article class="course-card">
+          <div class="date-row">
+            <div class="date-badge"><strong>${escapeHtml(d.day)}</strong><span>${escapeHtml(d.mon)}</span></div>
+            <div>
+              <h3>${escapeHtml(s.name || "課程場次")}｜${escapeHtml(d.label)}</h3>
+              <div class="time">${escapeHtml(s.time || "08:00–17:00")}</div>
+            </div>
+          </div>
+          <div class="meta">
+            <span class="chip good">✓ 報名名單可查詢</span>
+            <span class="chip">地點：${escapeHtml(s.place || "待公告")}</span>
+            <span class="chip">已登錄 ${count} 人</span>
+          </div>
+        </article>
+      `;
+    }).join("");
+
+    // 上方三個數字
+    document.getElementById("statSessions").textContent = `${DATA.sessions.length} 場次`;
+    const times = [...new Set(DATA.sessions.map(s => s.time || "08:00–17:00"))];
+    document.getElementById("statTime").textContent = times.length === 1 ? times[0] : "依場次而定";
+  }
+
+  function searchRoster(){
+    const input = document.getElementById("keyword");
+    const result = document.getElementById("result");
+    const q = input.value.trim().toLowerCase();
+
+    if(!q){
+      result.innerHTML = `<div class="empty">請先輸入姓名或工號再查詢。</div>`;
+      input.focus();
+      return;
+    }
+
+    const matches = DATA.people.filter(r =>
+      String(r.name || "").toLowerCase().includes(q) ||
+      String(r.id   || "").toLowerCase().includes(q)
+    );
+
+    if(matches.length === 0){
+      result.innerHTML = `<div class="empty">查無符合的報名資料，請再次確認姓名／工號，或聯絡課程承辦人。</div>`;
+      return;
+    }
+
+    result.innerHTML = matches.map(r => {
+      const s = sessionMap[r.date] || {};
+      const d = parseDate(r.date);
+      return `
+        <div class="result-card">
+          <div>
+            <div class="result-name">${escapeHtml(r.name)}</div>
+            <div class="result-sub">工號：${escapeHtml(r.id)}　｜　單位：${escapeHtml(r.unit || "－")}</div>
+          </div>
+          <div class="result-class">
+            <b>${escapeHtml(s.name || "課程")}｜${escapeHtml(d.label)}</b>
+            <div>上課時間：${escapeHtml(s.time || "08:00–17:00")}</div>
+          </div>
+        </div>
+      `;
+    }).join("");
+  }
+
+  async function loadRoster(){
+    const grid = document.getElementById("courseGrid");
+    try{
+      // 加時間戳記，避免瀏覽器拿到舊的快取名單
+      const res = await fetch(`${ROSTER_URL}?t=${Date.now()}`, { cache:"no-store" });
+      if(!res.ok) throw new Error(`HTTP ${res.status}`);
+      const json = await res.json();
+
+      DATA = {
+        updatedAt: json.updatedAt || "",
+        sessions: Array.isArray(json.sessions) ? json.sessions : [],
+        people:   Array.isArray(json.people)   ? json.people   : []
+      };
+      sessionMap = Object.fromEntries(DATA.sessions.map(s => [s.date, s]));
+
+      renderSessions();
+
+      document.getElementById("keyword").disabled = false;
+      document.getElementById("searchBtn").disabled = false;
+      document.getElementById("updated").textContent =
+        DATA.updatedAt ? `名單更新時間：${DATA.updatedAt}` : "";
+
+    }catch(err){
+      console.error(err);
+      grid.innerHTML = `
+        <div class="grid-msg err">
+          <b>讀不到名單檔案</b>
+          頁面找不到 <code>${escapeHtml(ROSTER_URL)}</code>，或檔案格式不是有效的 JSON。
+          請確認 roster.json 跟 index.html 在同一個資料夾，內容也沒有多餘的逗號。
+          （錯誤訊息：${escapeHtml(err.message)}）
+        </div>`;
+      document.getElementById("result").innerHTML =
+        `<div class="empty">名單尚未載入，暫時無法查詢。</div>`;
+    }
+  }
+
+  document.getElementById("searchBtn").addEventListener("click", searchRoster);
+  document.getElementById("keyword").addEventListener("keydown", e => {
+    if(e.key === "Enter") searchRoster();
+  });
+
+  loadRoster();
+</script>
+</body>
+</html>
