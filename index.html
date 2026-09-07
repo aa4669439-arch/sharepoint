@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>SharePoint 知識管理建置｜課程報名查詢</title>
+<style>
+  :root{
+    --navy:#17324d;
+    --blue:#3b82f6;
+    --cyan:#06b6d4;
+    --teal:#14b8a6;
+    --purple:#8b5cf6;
+    --pink:#ec4899;
+    --orange:#f59e0b;
+    --coral:#fb7185;
+    --sky:#eef8ff;
+    --paper:#fffdfb;
+    --line:#dfeaf0;
+    --text:#25313c;
+    --muted:#6f7b85;
+    --white:#ffffff;
+    --green:#22a06b;
+    --amber:#a9701f;
+    --shadow:0 18px 45px rgba(38,74,96,.12);
+    --radius:24px;
+  }
+
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;
+    font-family:"Microsoft JhengHei","Noto Sans TC",system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    color:var(--text);
+    background:
+      radial-gradient(circle at 10% 8%, rgba(59,130,246,.14), transparent 27%),
+      radial-gradient(circle at 90% 12%, rgba(236,72,153,.10), transparent 25%),
+      radial-gradient(circle at 75% 80%, rgba(20,184,166,.10), transparent 26%),
+      linear-gradient(135deg,#f8fbff 0%,#fffaf6 48%,#f8fcfb 100%);
+  }
+
+  .page{max-width:1180px;margin:auto;padding:28px 24px 52px}
+
+  .topbar{
+    display:flex;align-items:center;justify-content:space-between;
+    gap:16px;margin-bottom:22px
+  }
+
+  .brand{
+    display:flex;align-items:center;gap:12px;
+    color:var(--navy);font-weight:800;letter-spacing:.5px;font-size:17px
+  }
+
+  .pill{
+    padding:9px 14px;border-radius:999px;background:linear-gradient(135deg,#fff4f8,#eef8ff);color:#7c3aed;
+    font-size:14px;font-weight:800;border:1px solid #eadcf8
+  }
+
+  .hero{
+    position:relative;overflow:hidden;
+    background:linear-gradient(135deg,rgba(255,255,255,.96),rgba(248,252,255,.96));
+    border:1px solid #dceaf2;border-radius:30px;
+    padding:46px 48px 38px;box-shadow:var(--shadow)
+  }
+
+  .hero:before,.hero:after{
+    content:"";position:absolute;border-radius:999px;filter:blur(.2px);pointer-events:none
+  }
+  .hero:before{
+    width:280px;height:280px;right:-100px;top:-120px;
+    background:linear-gradient(135deg,rgba(59,130,246,.18),rgba(139,92,246,.16),rgba(236,72,153,.12))
+  }
+  .hero:after{
+    width:180px;height:180px;left:-80px;bottom:-105px;
+    background:linear-gradient(135deg,rgba(20,184,166,.10),rgba(245,158,11,.10))
+  }
+
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:8px;
+    color:#7c3aed;font-size:14px;font-weight:900;letter-spacing:1.4px
+  }
+  .eyebrow:before{content:"";width:26px;height:3px;border-radius:5px;background:linear-gradient(90deg,var(--blue),var(--purple))}
+
+  h1{
+    margin:12px 0 12px;color:#15293b;
+    font-size:clamp(34px,5vw,56px);line-height:1.13;letter-spacing:-1.5px
+  }
+  .accent-line{
+    width:230px;max-width:60%;height:4px;border-radius:99px;
+    background:linear-gradient(90deg,var(--blue),var(--cyan),var(--teal),var(--orange),var(--pink));margin:10px 0 18px
+  }
+  .hero p{margin:0;max-width:820px;font-size:18px;line-height:1.85;color:#4f5e68}
+
+  .hero-stats{
+    margin-top:30px;display:grid;grid-template-columns:repeat(3,1fr);gap:14px;
+    max-width:760px
+  }
+  .stat{
+    background:#fff;border:1px solid #e6edf2;border-radius:18px;padding:17px 18px;
+    position:relative;overflow:hidden
+  }
+  .stat:before{
+    content:"";position:absolute;left:0;top:0;right:0;height:4px;border-radius:18px 18px 0 0
+  }
+  .stat:nth-child(1){background:linear-gradient(145deg,#ffffff,#f2f7ff)}
+  .stat:nth-child(1):before{background:linear-gradient(90deg,#3b82f6,#06b6d4)}
+  .stat:nth-child(2){background:linear-gradient(145deg,#ffffff,#f8f4ff)}
+  .stat:nth-child(2):before{background:linear-gradient(90deg,#8b5cf6,#ec4899)}
+  .stat:nth-child(3){background:linear-gradient(145deg,#ffffff,#fff8ed)}
+  .stat:nth-child(3):before{background:linear-gradient(90deg,#f59e0b,#fb7185)}
+  .stat b{display:block;color:var(--navy);font-size:22px;margin-bottom:4px}
+  .stat span{font-size:14px;color:var(--muted)}
+
+  .section{margin-top:28px}
+  .section-title{
+    display:flex;align-items:end;justify-content:space-between;gap:18px;margin:0 2px 14px
+  }
+  .section-title h2{margin:0;color:var(--navy);font-size:24px;position:relative;padding-bottom:8px}
+  .section-title h2:after{
+    content:"";position:absolute;left:0;bottom:0;width:54px;height:4px;border-radius:999px;
+    background:linear-gradient(90deg,var(--blue),var(--purple),var(--pink))
+  }
+  .section-title p{margin:0;color:var(--muted);font-size:15px}
+
+  .banner{
+    margin:0 0 16px;padding:13px 16px;border-radius:16px;
+    background:linear-gradient(90deg,#eef6ff,#f7f1ff,#fff3f8,#fff8ed);
+    border:1px solid #eadff1;color:#516070;font-size:15px;font-weight:700
+  }
+
+  .course-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+  .course-card{
+    background:#fff;border:1px solid #e3ecef;border-radius:24px;
+    padding:24px;box-shadow:0 10px 28px rgba(26,63,79,.07);
+    position:relative;overflow:hidden
+  }
+  .course-card:after{
+    content:"";position:absolute;right:-24px;top:-32px;width:115px;height:115px;border-radius:50%;
+    background:rgba(59,130,246,.08)
+  }
+
+  /* 場次卡片四色循環：藍 → 粉 → 綠 → 橘，開再多梯次都有顏色 */
+  .course-card:nth-child(4n+1){background:linear-gradient(145deg,#ffffff 0%,#f3f8ff 100%);border-color:#d9e7ff}
+  .course-card:nth-child(4n+1):after{background:rgba(59,130,246,.08)}
+  .course-card:nth-child(4n+1) .date-badge{background:linear-gradient(145deg,#eaf3ff,#f6fbff);border-color:#cfe0ff;color:#2563eb}
+  .course-card:nth-child(4n+1) .time{color:#2563eb}
+
+  .course-card:nth-child(4n+2){background:linear-gradient(145deg,#ffffff 0%,#fff6fb 100%);border-color:#f2d9e8}
+  .course-card:nth-child(4n+2):after{background:rgba(236,72,153,.08)}
+  .course-card:nth-child(4n+2) .date-badge{background:linear-gradient(145deg,#fff0f7,#fff9fc);border-color:#f4d6e5;color:#db2777}
+  .course-card:nth-child(4n+2) .time{color:#db2777}
+
+  .course-card:nth-child(4n+3){background:linear-gradient(145deg,#ffffff 0%,#f2fdfa 100%);border-color:#cfeee6}
+  .course-card:nth-child(4n+3):after{background:rgba(20,184,166,.09)}
+  .course-card:nth-child(4n+3) .date-badge{background:linear-gradient(145deg,#e6faf5,#f6fefc);border-color:#c7ece3;color:#0d9488}
+  .course-card:nth-child(4n+3) .time{color:#0d9488}
+
+  .course-card:nth-child(4n+4){background:linear-gradient(145deg,#ffffff 0%,#fffaf1 100%);border-color:#f5e3c4}
+  .course-card:nth-child(4n+4):after{background:rgba(245,158,11,.10)}
+  .course-card:nth-child(4n+4) .date-badge{background:linear-gradient(145deg,#fff5e4,#fffdf8);border-color:#f6e2bf;color:#c2740a}
+  .course-card:nth-child(4n+4) .time{color:#c2740a}
+
+  .date-row{display:flex;align-items:center;gap:16px;position:relative;z-index:1}
+  .date-badge{
+    min-width:82px;height:82px;border-radius:20px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    background:linear-gradient(145deg,#e9f5f8,#f8fcfd);
+    border:1px solid #d8ebef;color:var(--blue)
+  }
+  .date-badge strong{font-size:29px;line-height:1}
+  .date-badge span{font-size:14px;margin-top:6px;font-weight:700}
+  .course-card h3{margin:0 0 7px;font-size:21px;color:#1c3548}
+  .course-card .time{font-size:18px;font-weight:800;color:var(--blue)}
+  .meta{display:flex;gap:9px;flex-wrap:wrap;margin-top:20px}
+  .chip{
+    font-size:14px;padding:8px 11px;border-radius:10px;background:#f5f8f9;
+    border:1px solid #e2eaed;color:#52616b
+  }
+  .chip.good{background:linear-gradient(135deg,#ecfdf5,#effcf9);color:#0f8a63;border-color:#ccefe1}
+
+  .grid-msg{
+    grid-column:1 / -1;border-radius:24px;padding:26px;font-size:16px;line-height:1.75;
+    background:linear-gradient(145deg,#ffffff,#f7fbff);border:1px solid #e3ecef;color:var(--muted)
+  }
+  .grid-msg.err{background:linear-gradient(145deg,#fffaf2,#fff4e8);border-color:#f2ddbc;color:#7d5a22}
+  .grid-msg b{display:block;color:#3b4a55;margin-bottom:6px;font-size:17px}
+  .grid-msg.err b{color:var(--amber)}
+
+  .search-wrap{
+    margin-top:30px;background:linear-gradient(135deg,#183650 0%,#2b5f82 32%,#5b4aa8 68%,#a63d78 100%);
+    border-radius:28px;padding:30px;box-shadow:0 16px 40px rgba(23,50,77,.16);
+    color:#fff
+  }
+  .search-wrap h2{margin:0;font-size:26px}
+  .search-wrap p{margin:8px 0 20px;color:#e4eef4;font-size:15px}
+  .search-row{display:flex;gap:12px}
+  .search-input{
+    flex:1;border:0;outline:none;border-radius:16px;padding:16px 18px;font-size:17px;
+    background:#fff;color:#20323f;box-shadow:inset 0 0 0 1px rgba(0,0,0,.04)
+  }
+  .search-btn{
+    border:0;border-radius:16px;padding:0 24px;font-weight:800;font-size:16px;
+    background:linear-gradient(135deg,#f8d66d,#ffb86c,#ff8fa3);color:#49321f;cursor:pointer;
+    min-height:54px;transition:.2s ease
+  }
+  .search-btn:hover:not(:disabled){transform:translateY(-1px);filter:brightness(1.03)}
+  .search-btn:disabled{opacity:.55;cursor:not-allowed}
+  .search-btn:focus-visible,.search-input:focus-visible,.filter-btn:focus-visible{
+    outline:3px solid #ffd9a8;outline-offset:2px
+  }
+
+  .result{margin-top:18px}
+  .result-card{
+    background:#fff;color:var(--text);border-radius:20px;padding:20px;
+    display:grid;grid-template-columns:1.1fr .9fr;gap:18px;align-items:center
+  }
+  .result-card + .result-card{margin-top:10px}
+  .result-name{font-size:23px;font-weight:900;color:#183650}
+  .result-sub{margin-top:5px;color:#6e7a84;font-size:15px}
+  .result-class{
+    background:linear-gradient(135deg,#eff8fa,#f6f1ff);border:1px solid #ddeaf0;border-radius:16px;padding:14px 16px
+  }
+  .result-class b{display:block;color:#1d6e89;font-size:18px;margin-bottom:4px}
+  .empty{
+    background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.18);
+    padding:15px 16px;border-radius:16px;color:#f2f8fb;font-size:15px;line-height:1.7
+  }
+  .updated{margin-top:14px;font-size:14px;color:#d5e2ea}
+
+  .roster-panel{
+    background:linear-gradient(180deg,#ffffff,#fbfdff);border:1px solid #e3ecef;border-radius:24px;
+    padding:24px;box-shadow:0 10px 28px rgba(26,63,79,.06)
+  }
+  .roster-toolbar{
+    display:flex;align-items:center;justify-content:space-between;
+    gap:14px;flex-wrap:wrap;margin-bottom:18px
+  }
+  .filter-rows{display:flex;flex-direction:column;gap:12px;flex:1;min-width:0}
+  .filter-line{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .filter-label{
+    flex:0 0 auto;font-size:14px;font-weight:900;color:#7c3aed;letter-spacing:.5px;
+    padding:5px 11px;border-radius:999px;
+    background:linear-gradient(135deg,#f3ecff,#fff1f7);border:1px solid #e8dcf6
+  }
+  .filter-group{display:flex;gap:8px;flex-wrap:wrap}
+  .filter-btn{
+    border:1px solid #d8e5e9;background:#fff;color:#53636d;
+    border-radius:12px;padding:10px 14px;font-weight:800;font-size:15px;cursor:pointer;
+    transition:.15s ease
+  }
+  .filter-btn:hover{border-color:#c3d6e6}
+  .filter-btn.active{
+    background:linear-gradient(135deg,#e8f3ff,#f5eeff);color:#6d4bc2;border-color:#d8c9f2
+  }
+  /* 單位那一排用暖色，跟梯次區隔開 */
+  .filter-group.unit .filter-btn.active{
+    background:linear-gradient(135deg,#fff2e6,#fff0f6);color:#c2410c;border-color:#f6d9c4
+  }
+  .roster-count{font-size:15px;color:#70808a;font-weight:700}
+  /* ---------- 名牌卡片 ---------- */
+  .badge-grid{
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:16px
+  }
+
+  .badge{
+    position:relative;overflow:hidden;border-radius:20px;
+    background:#fff;border:1px solid #e4e8ec;
+    box-shadow:0 1px 2px rgba(18,26,34,.05),
+               0 4px 10px rgba(18,26,34,.05),
+               0 12px 24px rgba(18,26,34,.05);
+    transition:transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+    animation:badgeIn .45s cubic-bezier(.21,.9,.35,1) both;
+  }
+  .badge:hover{
+    transform:translateY(-4px);border-color:#d3dae0;
+    box-shadow:0 2px 4px rgba(18,26,34,.06),
+               0 10px 20px rgba(18,26,34,.09),
+               0 22px 40px rgba(18,26,34,.08)
+  }
+
+  @keyframes badgeIn{
+    from{opacity:0;transform:translateY(14px) scale(.97)}
+    to{opacity:1;transform:none}
+  }
+
+  /* ---------- 卡片上的插畫 ---------- */
+  .badge-art{
+    position:absolute;top:50px;right:4px;width:94px;height:94px;z-index:0;
+    opacity:.9;transform:rotate(-8deg);
+    transition:opacity .35s ease, transform .4s cubic-bezier(.34,1.4,.5,1);
+    pointer-events:none;user-select:none
+  }
+  .badge:hover .badge-art{opacity:1;transform:rotate(2deg) translateY(-7px) scale(1.08)}
+  .badge-art svg{width:100%;height:100%;display:block;overflow:visible}
+  .badge-art [class^="an-"]{transform-box:fill-box;transform-origin:center}
+
+  @keyframes bob{
+    0%,100%{transform:translateY(0)}
+    50%    {transform:translateY(-5px)}
+  }
+  @keyframes flame{
+    from{transform:scaleY(.75) scaleX(.92);opacity:.85}
+    to  {transform:scaleY(1.2) scaleX(1.05);opacity:1}
+  }
+  @keyframes drift{
+    0%,100%{transform:translateX(0)}
+    50%    {transform:translateX(4px)}
+  }
+  @keyframes twinkle{
+    0%,100%{opacity:.3;transform:scale(.75) rotate(0deg)}
+    50%    {opacity:1;transform:scale(1.2) rotate(15deg)}
+  }
+
+  .an-rocket,.an-balloon,.an-planet{animation:bob 3.6s ease-in-out infinite}
+  .an-balloon{animation-duration:4.4s}
+  .an-planet{animation-duration:4s}
+  .an-flame{transform-origin:center top !important;animation:flame .4s ease-in-out infinite alternate}
+  .an-flame2{animation-duration:.27s}
+  .an-cloudL{animation:drift 5.2s ease-in-out infinite}
+  .an-cloudR{animation:drift 5.2s ease-in-out infinite reverse}
+  .an-tw {animation:twinkle 2.3s ease-in-out infinite}
+  .an-tw2{animation:twinkle 1.8s ease-in-out .5s infinite}
+
+  /* 上方掛繩帶（中性色） */
+  .badge-strip{
+    position:relative;height:44px;display:flex;align-items:center;justify-content:center;
+    background:#f4f6f8;border-bottom:1px solid #e8ecef;
+    color:#1a1a1a;font-weight:900;font-size:15px;letter-spacing:1px
+  }
+  .badge-strip:after{
+    content:"";position:absolute;left:50%;bottom:-1px;transform:translateX(-50%);
+    width:54px;height:9px;border-radius:0 0 9px 9px;background:#fff;
+    box-shadow:inset 0 -1px 0 #e8ecef;z-index:1
+  }
+  .badge-strip span{position:relative;z-index:1}
+
+  .badge-body{position:relative;z-index:1;padding:20px 78px 6px 20px}
+  .badge-name{font-size:25px;font-weight:900;color:#141a20;line-height:1.15}
+  .badge-code{
+    margin-top:5px;font-size:15px;font-weight:800;letter-spacing:2.5px;color:#3d4650;
+    font-family:"Consolas","Menlo",monospace
+  }
+
+  .badge-foot{
+    position:relative;z-index:1;
+    display:flex;flex-wrap:wrap;gap:8px;padding:14px 20px 20px
+  }
+  .badge-tag{
+    font-size:14px;font-weight:800;padding:7px 12px;border-radius:999px;
+    background:#f5f7f9;border:1px solid #e4e8ec;color:#2b333b
+  }
+  .badge-no{
+    position:absolute;right:14px;bottom:12px;z-index:2;
+    font-size:13px;font-weight:900;color:#b9c2ca;letter-spacing:1px
+  }
+
+
+  .table-msg{
+    grid-column:1 / -1;padding:34px;text-align:center;color:var(--muted);font-size:16px;
+    background:linear-gradient(145deg,#ffffff,#f8fbff);border:1px dashed #dbe6ee;border-radius:20px
+  }
+
+  .info-grid{display:grid;grid-template-columns:1fr;gap:18px;margin-top:28px}
+  .panel{
+    background:linear-gradient(145deg,#ffffff,#fcfdff);border:1px solid #e3ecef;border-radius:24px;padding:24px;
+    box-shadow:0 10px 28px rgba(26,63,79,.06)
+  }
+  .panel h3{margin:0 0 16px;color:var(--navy);font-size:20px}
+  .notice{
+    display:grid;grid-template-columns:36px 1fr;gap:12px;align-items:start;
+    padding:14px 0;border-top:1px solid #edf2f4
+  }
+  .notice:first-of-type{border-top:0;padding-top:0}
+  .num{
+    width:30px;height:30px;border-radius:10px;display:grid;place-items:center;
+    background:linear-gradient(135deg,#eef5ff,#fff1f7);color:#7c3aed;font-weight:900;font-size:13px
+  }
+  .notice b{display:block;color:#263d4d;margin-bottom:4px;font-size:16px}
+  .notice span{font-size:15px;color:#6c7881;line-height:1.65}
+
+  .admin-box{background:linear-gradient(145deg,#f8fbfc,#fdf9ff);border:1px dashed #cdd9e6;border-radius:18px;padding:16px}
+  .admin-box code{display:block;margin-top:8px;font-size:13px;white-space:pre-wrap;color:#47606e}
+  .small{font-size:14px;color:#6b7a85;line-height:1.7}
+  footer{text-align:center;color:#8a969d;font-size:13px;margin-top:26px}
+
+  @media(prefers-reduced-motion:reduce){
+    *{transition:none !important;animation:none !important}
+    html{scroll-behavior:auto}
+  }
+
+  @media(max-width:800px){
+    .page{padding:18px 14px 36px}
+    .hero{padding:34px 24px 28px}
+    .hero-stats{grid-template-columns:1fr}
+    .course-grid,.info-grid{grid-template-columns:1fr}
+    .search-row{flex-direction:column}
+    .search-btn{padding:15px 20px}
+    .result-card{grid-template-columns:1fr}
+    .topbar{align-items:flex-start}
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="topbar">
+    <div class="brand">知識管理課程平台</div>
+    <div class="pill">課程報名資訊</div>
+  </div>
+
+  <section class="hero">
+    <div class="eyebrow">SHAREPOINT KNOWLEDGE MANAGEMENT</div>
+    <h1>SharePoint 知識管理建置<br>試作教學課程報名查詢</h1>
+    <div class="accent-line"></div>
+    <p>輔導特定單位建立 SharePoint 應用能力，記錄各單位的職責分配，作為知識管理平台落地實施的基礎。</p>
+
+    <div class="hero-stats">
+      <div class="stat"><b id="statSessions">－</b><span>可依報名日期參與課程</span></div>
+      <div class="stat"><b id="statTime">－</b><span>全天實作與教學</span></div>
+      <div class="stat"><b>即時查詢</b><span>輸入姓名或人事號即可確認</span></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-title">
+      <h2>課程場次</h2>
+      <p>請依報名結果於指定日期準時參與</p>
+    </div>
+
+    <div class="banner">✦ 兩梯次皆為全天課程，請依個人報名結果參加指定場次</div>
+
+    <div class="course-grid" id="courseGrid">
+      <div class="grid-msg">正在載入課程場次…</div>
+    </div>
+  </section>
+
+  <section class="search-wrap" id="query">
+    <h2>查詢我的上課時間</h2>
+    <p>請輸入「姓名」或「人事號」。系統會顯示您目前登錄的課程日期與時間。</p>
+    <div class="search-row">
+      <input id="keyword" class="search-input" placeholder="例如：王小明 / A12345" autocomplete="off" disabled />
+      <button id="searchBtn" class="search-btn" disabled>查詢報名結果</button>
+    </div>
+    <div class="result" id="result"></div>
+    <div class="updated" id="updated"></div>
+  </section>
+
+  <section class="section" id="allRoster">
+    <div class="section-title">
+      <h2>全部報名名單</h2>
+      <p>可依梯次或單位篩選，兩者能同時使用</p>
+    </div>
+
+    <div class="roster-panel">
+      <div class="roster-toolbar">
+        <div class="filter-rows">
+          <div class="filter-line">
+            <span class="filter-label">梯次</span>
+            <div class="filter-group" id="filterGroup"></div>
+          </div>
+          <div class="filter-line">
+            <span class="filter-label">單位</span>
+            <div class="filter-group unit" id="unitGroup"></div>
+          </div>
+        </div>
+        <div class="roster-count" id="rosterCount"></div>
+      </div>
+
+      <div class="badge-grid" id="rosterBody">
+        <div class="table-msg">正在載入名單…</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="info-grid">
+    <div class="panel">
+      <h3>報名資訊</h3>
+      <div class="notice">
+        <div class="num">01</div>
+        <div><b>課程時間</b><span>兩梯次皆為 08:00–17:00，請依查詢結果參與指定場次。</span></div>
+      </div>
+      <div class="notice">
+        <div class="num">02</div>
+        <div><b>查詢方式</b><span>以姓名或人事號查詢即可。若查無資料，請洽冠博(32911)確認名單。</span></div>
+      </div>
+      <div class="notice">
+        <div class="num">03</div>
+        <div><b>課程提醒</b><span>請攜帶自己的筆記型電腦，並預先確認 SharePoint 存取權限。</span></div>
+      </div>
+    </div>
+  </section>
+
+  <footer>SharePoint 知識管理建置｜課程報名查詢頁</footer>
+</div>
+
+<script>
+  /* ===================================================================
+     設定區：整份檔案你唯一可能需要改的地方
+     roster.json 跟 index.html 放在同一個資料夾，所以這樣寫就好。
+     =================================================================== */
+  const ROSTER_URL = "roster.json";
+
+  /* ===================================================================
+     以下不用改
+     =================================================================== */
+
+  const MONTHS = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
+
+  /* ---------- 名牌上的插畫（純 SVG，不用外部圖檔） ---------- */
+  const ART = [
+    // 火箭
+    `<svg viewBox="0 0 100 100" aria-hidden="true"><g class="an-rocket">
+      <circle cx="33" cy="86" r="7" fill="#cfe3f5"/><circle cx="46" cy="93" r="5" fill="#cfe3f5"/>
+      <path class="an-flame" d="M50 70 C58 79 56 92 50 99 C44 92 42 79 50 70Z" fill="#fb923c"/>
+      <path class="an-flame an-flame2" d="M50 75 C54 81 53 90 50 95 C47 90 46 81 50 75Z" fill="#fde047"/>
+      <path d="M35 50 C27 59 26 70 29 77 L40 67Z" fill="#3b82f6"/>
+      <path d="M65 50 C73 59 74 70 71 77 L60 67Z" fill="#3b82f6"/>
+      <path d="M50 5 C64 19 70 42 68 62 C62 70 38 70 32 62 C30 42 36 19 50 5Z" fill="#fff" stroke="#b9d2e8" stroke-width="3"/>
+      <path d="M33 55 C42 60 58 60 67 55 L67 62 C58 67 42 67 33 62Z" fill="#f87171"/>
+      <circle cx="50" cy="33" r="11" fill="#7dd3fc" stroke="#38bdf8" stroke-width="3"/>
+      <circle cx="46" cy="29" r="3.4" fill="#eafaff"/>
+    </g></svg>`,
+
+    // 熱氣球
+    `<svg viewBox="0 0 100 100" aria-hidden="true"><g class="an-balloon">
+      <path d="M50 6 C71 6 83 23 83 40 C83 57 66 69 50 75 C34 69 17 57 17 40 C17 23 29 6 50 6Z" fill="#f9a8d4"/>
+      <path d="M50 6 C59 6 64 23 64 40 C64 55 57 68 50 75 C43 68 36 55 36 40 C36 23 41 6 50 6Z" fill="#fbcfe8"/>
+      <path d="M50 6 C54 6 57 23 57 40 C57 55 53 68 50 75 C47 68 43 55 43 40 C43 23 46 6 50 6Z" fill="#f472b6"/>
+      <path d="M50 6 C57 12 61 24 61 40" fill="none" stroke="#fff" stroke-width="2.4" opacity=".65"/>
+      <path d="M41 73 L44 85 M59 73 L56 85" stroke="#c084fc" stroke-width="2.6"/>
+      <path d="M41 85 h18 l-2.5 12 h-13Z" fill="#d8b4fe" stroke="#a855f7" stroke-width="2"/>
+    </g></svg>`,
+
+    // 彩虹與雲
+    `<svg viewBox="0 0 100 100" aria-hidden="true"><g fill="none" stroke-width="9" stroke-linecap="round">
+      <path d="M10 78 A40 40 0 0 1 90 78" stroke="#fb7185"/>
+      <path d="M21 78 A29 29 0 0 1 79 78" stroke="#fbbf24"/>
+      <path d="M32 78 A18 18 0 0 1 68 78" stroke="#34d399"/>
+      <path d="M43 78 A7 7 0 0 1 57 78" stroke="#60a5fa"/>
+    </g>
+      <g stroke="#cfe3ef" stroke-width="2.5" fill="#fff">
+        <g class="an-cloudL"><ellipse cx="17" cy="82" rx="17" ry="11"/></g>
+        <g class="an-cloudR"><ellipse cx="83" cy="82" rx="17" ry="11"/></g>
+      </g>
+    </svg>`,
+
+    // 土星與星星
+    `<svg viewBox="0 0 100 100" aria-hidden="true"><g class="an-planet">
+      <ellipse cx="50" cy="56" rx="40" ry="12" fill="none" stroke="#d97706" stroke-width="5" transform="rotate(-20 50 56)"/>
+      <circle cx="50" cy="50" r="25" fill="#fdba74" stroke="#fb923c" stroke-width="2.5"/>
+      <circle cx="41" cy="42" r="5.5" fill="#fb923c" opacity=".65"/>
+      <circle cx="59" cy="57" r="7.5" fill="#fb923c" opacity=".5"/>
+      <path d="M12 62 A40 12 0 0 0 78 74" fill="none" stroke="#f59e0b" stroke-width="5" stroke-linecap="round" transform="rotate(-20 50 56)"/>
+    </g>
+      <path class="an-tw"  d="M86 14 l3.5 9 9 3.5 -9 3.5 -3.5 9 -3.5-9 -9-3.5 9-3.5Z" fill="#fcd34d"/>
+      <path class="an-tw2" d="M14 24 l2.5 6.5 6.5 2.5 -6.5 2.5 -2.5 6.5 -2.5-6.5 -6.5-2.5 6.5-2.5Z" fill="#fcd34d"/>
+    </svg>`
+  ];
+
+  let DATA = { updatedAt:"", sessions:[], people:[] };
+  let sessionMap = {};
+  let currentFilter = "all";   // 梯次
+  let currentUnit   = "all";   // 單位
+
+  function escapeHtml(text){
+    return String(text ?? "")
+      .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;").replaceAll("'","&#039;");
+  }
+
+  // "2026-09-21" → { day:"21", mon:"SEP", label:"2026 / 09 / 21", short:"9 / 21" }
+  function parseDate(iso){
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso || "").trim());
+    if(!m) return { day:"–", mon:"", label:String(iso || ""), short:String(iso || "") };
+    return {
+      day: m[3],
+      mon: MONTHS[parseInt(m[2],10) - 1] || "",
+      label: `${m[1]} / ${m[2]} / ${m[3]}`,
+      short: `${parseInt(m[2],10)} / ${parseInt(m[3],10)}`
+    };
+  }
+
+  /* ---------- 課程場次卡片 ---------- */
+  function renderSessions(){
+    const grid = document.getElementById("courseGrid");
+
+    if(!DATA.sessions.length){
+      grid.innerHTML = `<div class="grid-msg"><b>目前沒有課程場次</b>名單檔案裡還沒有填入場次資料。</div>`;
+      return;
+    }
+
+    grid.innerHTML = DATA.sessions.map(s => {
+      const d = parseDate(s.date);
+      const count = DATA.people.filter(p => p.date === s.date).length;
+      return `
+        <article class="course-card">
+          <div class="date-row">
+            <div class="date-badge"><strong>${escapeHtml(d.day)}</strong><span>${escapeHtml(d.mon)}</span></div>
+            <div>
+              <h3>${escapeHtml(s.name || "課程場次")}｜${escapeHtml(d.label)}</h3>
+              <div class="time">${escapeHtml(s.time || "08:00-17:00")}</div>
+            </div>
+          </div>
+          <div class="meta">
+            <span class="chip good">✓ 報名名單可查詢</span>
+            <span class="chip">地點：${escapeHtml(s.place || "待公告")}</span>
+            <span class="chip">已登錄 ${count} 人</span>
+          </div>
+        </article>
+      `;
+    }).join("");
+
+    document.getElementById("statSessions").textContent = `${DATA.sessions.length} 場次`;
+    const times = [...new Set(DATA.sessions.map(s => s.time || "08:00-17:00"))];
+    document.getElementById("statTime").textContent = times.length === 1 ? times[0] : "依場次而定";
+  }
+
+  /* ---------- 篩選按鈕（依場次自動產生） ---------- */
+  function renderFilters(){
+    const group = document.getElementById("filterGroup");
+    const buttons = [{ key:"all", text:"全部名單" }]
+      .concat(DATA.sessions.map(s => ({ key:s.date, text:parseDate(s.date).short })));
+
+    group.innerHTML = buttons.map(b =>
+      `<button class="filter-btn${b.key === currentFilter ? " active" : ""}" data-date="${escapeHtml(b.key)}">${escapeHtml(b.text)}</button>`
+    ).join("");
+
+    group.querySelectorAll(".filter-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        currentFilter = btn.dataset.date;
+        group.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        renderRoster();
+      });
+    });
+  }
+
+  /* ---------- 單位篩選按鈕（依名單裡實際出現的單位自動產生） ---------- */
+  function renderUnitFilters(){
+    const group = document.getElementById("unitGroup");
+
+    // 抓出所有不重複的單位，依筆劃／字母排序
+    const units = [...new Set(
+      DATA.people.map(p => String(p.unit || "").trim()).filter(Boolean)
+    )].sort((a, b) => a.localeCompare(b, "zh-Hant"));
+
+    const buttons = [{ key:"all", text:"全部單位" }]
+      .concat(units.map(u => ({ key:u, text:u })));
+
+    group.innerHTML = buttons.map(b =>
+      `<button class="filter-btn${b.key === currentUnit ? " active" : ""}" data-unit="${escapeHtml(b.key)}">${escapeHtml(b.text)}</button>`
+    ).join("");
+
+    group.querySelectorAll(".filter-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        currentUnit = btn.dataset.unit;
+        group.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        renderRoster();
+      });
+    });
+  }
+
+  /* ---------- 全部名單表格 ---------- */
+  function renderRoster(){
+    const body = document.getElementById("rosterBody");
+    const count = document.getElementById("rosterCount");
+
+    // 梯次和單位兩個條件同時套用
+    const list = DATA.people.filter(r => {
+      const okDate = currentFilter === "all" || r.date === currentFilter;
+      const okUnit = currentUnit === "all" || String(r.unit || "").trim() === currentUnit;
+      return okDate && okUnit;
+    });
+
+    count.textContent = `共 ${list.length} 人`;
+
+    if(!list.length){
+      body.innerHTML = `<div class="table-msg">目前這個條件沒有符合的報名資料。</div>`;
+      return;
+    }
+
+    body.innerHTML = list.map((r, i) => {
+      const s = sessionMap[r.date] || {};
+      const d = parseDate(r.date);
+
+      // 顏色跟上面的場次卡片對應：同一梯次 = 同一個顏色
+      const idx = DATA.sessions.findIndex(x => x.date === r.date);
+      const ci = (idx < 0 ? 0 : idx) % 4;
+      const color = `c${ci + 1}`;
+
+      const seq = String(i + 1).padStart(3, "0");
+
+      return `
+        <article class="badge ${color}" style="animation-delay:${Math.min(i, 24) * 45}ms">
+          <div class="badge-art">${ART[ci]}</div>
+          <div class="badge-strip"><span>${escapeHtml(s.name || "課程場次")}</span></div>
+          <div class="badge-body">
+            <div>
+              <div class="badge-name">${escapeHtml(r.name)}</div>
+              <div class="badge-code">${escapeHtml(r.id)}</div>
+            </div>
+          </div>
+          <div class="badge-foot">
+            <span class="badge-tag">${escapeHtml(r.unit || "－")}</span>
+            <span class="badge-tag">${escapeHtml(d.label)}</span>
+            <span class="badge-tag">${escapeHtml(s.time || "08:00-17:00")}</span>
+          </div>
+          <div class="badge-no">NO.${seq}</div>
+        </article>
+      `;
+    }).join("");
+  }
+
+  /* ---------- 姓名／人事號查詢 ---------- */
+  function searchRoster(){
+    const input = document.getElementById("keyword");
+    const result = document.getElementById("result");
+    const q = input.value.trim().toLowerCase();
+
+    if(!q){
+      result.innerHTML = `<div class="empty">請先輸入姓名或人事號再查詢。</div>`;
+      input.focus();
+      return;
+    }
+
+    const matches = DATA.people.filter(r =>
+      String(r.name || "").toLowerCase().includes(q) ||
+      String(r.id   || "").toLowerCase().includes(q)
+    );
+
+    if(matches.length === 0){
+      result.innerHTML = `<div class="empty">查無符合的報名資料，請再次確認姓名／人事號，或洽冠博(32911)。</div>`;
+      return;
+    }
+
+    result.innerHTML = matches.map(r => {
+      const s = sessionMap[r.date] || {};
+      const d = parseDate(r.date);
+      return `
+        <div class="result-card">
+          <div>
+            <div class="result-name">${escapeHtml(r.name)}</div>
+            <div class="result-sub">人事號：${escapeHtml(r.id)}　｜　單位：${escapeHtml(r.unit || "－")}</div>
+          </div>
+          <div class="result-class">
+            <b>${escapeHtml(s.name || "課程")}｜${escapeHtml(d.label)}</b>
+            <div>上課時間：${escapeHtml(s.time || "08:00-17:00")}</div>
+          </div>
+        </div>
+      `;
+    }).join("");
+  }
+
+  /* ---------- 載入 roster.json ---------- */
+  async function loadRoster(){
+    try{
+      const res = await fetch(`${ROSTER_URL}?t=${Date.now()}`, { cache:"no-store" });
+      if(!res.ok) throw new Error(`HTTP ${res.status}`);
+      const json = await res.json();
+
+      DATA = {
+        updatedAt: json.updatedAt || "",
+        sessions: Array.isArray(json.sessions) ? json.sessions : [],
+        people:   Array.isArray(json.people)   ? json.people   : []
+      };
+      sessionMap = Object.fromEntries(DATA.sessions.map(s => [s.date, s]));
+
+      renderSessions();
+      renderFilters();
+      renderUnitFilters();
+      renderRoster();
+
+      document.getElementById("keyword").disabled = false;
+      document.getElementById("searchBtn").disabled = false;
+      document.getElementById("updated").textContent =
+        DATA.updatedAt ? `名單更新時間：${DATA.updatedAt}` : "";
+
+    }catch(err){
+      console.error(err);
+      document.getElementById("courseGrid").innerHTML = `
+        <div class="grid-msg err">
+          <b>讀不到名單檔案</b>
+          頁面找不到 <code>${escapeHtml(ROSTER_URL)}</code>，或檔案格式不是有效的 JSON。
+          請確認 roster.json 跟 index.html 在同一個資料夾，內容也沒有多餘的逗號。
+          （錯誤訊息：${escapeHtml(err.message)}）
+        </div>`;
+      document.getElementById("result").innerHTML =
+        `<div class="empty">名單尚未載入，暫時無法查詢。</div>`;
+      document.getElementById("rosterBody").innerHTML =
+        `<div class="table-msg">名單尚未載入。</div>`;
+    }
+  }
+
+  document.getElementById("searchBtn").addEventListener("click", searchRoster);
+  document.getElementById("keyword").addEventListener("keydown", e => {
+    if(e.key === "Enter") searchRoster();
+  });
+
+  loadRoster();
+</script>
+</body>
+</html>
